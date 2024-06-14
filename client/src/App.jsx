@@ -11,7 +11,7 @@ export default function App() {
     <Routes>
       <Route element={<Layout />}>
         <Route index element={<StartPage />} />
-        <Route path="/chat" element={<ChatPage />} />
+        <Route path="/chat/:socketId" element={<ChatPage />} />
         <Route path="/call/:type/:socketId" element={<CallPage />} />
       </Route>
     </Routes>

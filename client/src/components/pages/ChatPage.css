@@ -1,0 +1,19 @@
+.h-100vh {
+    height: 100vh;
+}
+
+.b-l-white {
+    border-left: 1px solid #ddd;
+}
+
+.fs-10px {
+    font-size: 10px !important;
+}
+
+.fs-15px {
+    font-size: 15px !important;
+}
+
+.mr-1 {
+    margin-right: 1rem;
+}

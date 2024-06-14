@@ -2,6 +2,8 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import socketContext from "../../context/SocketContext";
 
+import "./Sidebar.css";
+
 export default function Sidebar() {
   const { conn, peerConnection } = useContext(socketContext);
   const [usersState, setUsersState] = useState([]);
@@ -47,26 +49,27 @@ export default function Sidebar() {
   return (
     <div
       className="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark"
-      style={{ width: "300px", height: "100vh" }}
+      style={{ width: "350px", height: "100vh" }}
     >
       <a
         href="/"
         className="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none"
       >
-        <span className="fs-4">Sidebar</span>
+        <span className="fs-4">Chat application</span>
       </a>
+      <small>user list &#8595;</small>
       <hr />
       <ul className="nav nav-pills flex-column mb-auto">
         {usersState?.map((userSocketId, index) => (
           <li key={index} className="nav-item">
-            <NavLink to={`/call/to/${userSocketId}`} className="nav-link text-white"
+            <NavLink to={`/chat/${userSocketId}`} className="nav-link text-white text-center"
               style={({isActive}) => {
                 return {
                   backgroundColor: isActive ? '#000' : '',
                   borderRadius: isActive ? "10px" : ''
                 }
               }}>
-              user-{userSocketId}
+              user-id : <strong>{userSocketId}</strong>
             </NavLink>
           </li>
         ))}
