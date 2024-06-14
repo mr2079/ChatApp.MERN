@@ -1,6 +1,22 @@
+import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import socketContext from "../../context/SocketContext";
 
 export default function Sidebar() {
+  const { conn } = useContext(socketContext);
+  const [usersState, setUsersState] = useState([]);
+
+  useEffect(() => {
+      conn?.on("update-user-list", ({ users }) => {
+        users.forEach(socketId => {
+          const isExistUser = usersState.find(id => id === socketId)
+          if (!isExistUser) {
+            setUsersState(prev => [...prev, socketId]);
+          }
+        });
+      })
+  }, [conn])
+
   return (
     <div
       className="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark"
@@ -14,9 +30,13 @@ export default function Sidebar() {
       </a>
       <hr />
       <ul className="nav nav-pills flex-column mb-auto">
-        <li className="nav-item">
-          <Link to={`/call`} className="nav-link text-white">Call</Link>
-        </li>
+        {usersState?.map((userSocketId, index) => (
+          <li key={index} className="nav-item">
+            <Link to={`/call/${userSocketId}`} className="nav-link text-white">
+              user-{userSocketId}
+            </Link>
+          </li>
+        ))}
       </ul>
       <hr />
       <div>

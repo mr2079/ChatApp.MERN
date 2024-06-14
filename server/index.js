@@ -20,20 +20,21 @@ const io = new Server(server, {
 let activeUsers = [];
 
 io.on("connection", (socket) => {
-  const isExistSocket = activeUsers.find((exist) => exist !== socket.id);
+  const isExistSocket = activeUsers.find((exist) => exist === socket.id);
 
   if (!isExistSocket) {
     activeUsers.push(socket.id);
     socket.emit("update-user-list", {
       users: activeUsers.filter((exist) => exist !== socket.id),
     });
+    socket.broadcast.emit("update-user-list", { users: [socket.id] });
   }
 
   socket.on("disconnect", () => {
     activeUsers = activeUsers.filter((exist) => exist !== socket.id);
     socket.broadcast.emit("remove-user", {
-      socketId: socket.id
-    })
+      socketId: socket.id,
+    });
   });
 });
 
