@@ -30,6 +30,20 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("update-user-list", { users: [socket.id] });
   }
 
+  socket.on("call-to", (data) => {
+    socket.to(data.to).emit("call-from", {
+      offer: data.offer,
+      socket: socket.id,
+    });
+  });
+
+  socket.on("answer-to", (data) => {
+    socket.to(data.to).emit("answer-from", {
+      answer: data.answer,
+      socket: socket.id,
+    });
+  });
+
   socket.on("disconnect", () => {
     activeUsers = activeUsers.filter((exist) => exist !== socket.id);
     socket.broadcast.emit("remove-user", {

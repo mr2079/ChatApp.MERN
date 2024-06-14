@@ -1,21 +1,48 @@
-import { useContext, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useContext, useEffect, useMemo, useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import socketContext from "../../context/SocketContext";
 
 export default function Sidebar() {
-  const { conn } = useContext(socketContext);
+  const { conn, peerConnection } = useContext(socketContext);
   const [usersState, setUsersState] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-      conn?.on("update-user-list", ({ users }) => {
-        users.forEach(socketId => {
-          const isExistUser = usersState.find(id => id === socketId)
-          if (!isExistUser) {
-            setUsersState(prev => [...prev, socketId]);
-          }
-        });
-      })
-  }, [conn])
+    conn?.on("update-user-list", ({ users }) => {
+      users.forEach((socketId) => {
+        const isExistUser = usersState.find((id) => id === socketId);
+        if (!isExistUser) {
+          setUsersState((prev) => [...prev, socketId]);
+        }
+      });
+    });
+
+    conn?.on("remove-user", ({ socketId }) => {
+      setUsersState((prev) => prev.filter((id) => id !== socketId));
+    });
+
+    conn?.on("call-from", async (data) => {
+      const isConfirmed = confirm(
+        `user-${data.socket} is calling you now. Do you want to answer?`
+      );
+      if (!isConfirmed) {
+        return;
+      }
+      await peerConnection?.setRemoteDescription(
+        new RTCSessionDescription(data.offer)
+      );
+      const answer = await peerConnection?.createAnswer();
+      await peerConnection?.setLocalDescription(
+        new RTCSessionDescription(answer)
+      );
+      conn?.on("answer-to", {
+        answer,
+        to: data.socket,
+      });
+
+      navigate(`/call/from/${data.socket}`);
+    });
+  }, [conn]);
 
   return (
     <div
@@ -32,9 +59,15 @@ export default function Sidebar() {
       <ul className="nav nav-pills flex-column mb-auto">
         {usersState?.map((userSocketId, index) => (
           <li key={index} className="nav-item">
-            <Link to={`/call/${userSocketId}`} className="nav-link text-white">
+            <NavLink to={`/call/to/${userSocketId}`} className="nav-link text-white"
+              style={({isActive}) => {
+                return {
+                  backgroundColor: isActive ? '#000' : '',
+                  borderRadius: isActive ? "10px" : ''
+                }
+              }}>
               user-{userSocketId}
-            </Link>
+            </NavLink>
           </li>
         ))}
       </ul>
